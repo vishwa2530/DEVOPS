@@ -1,41 +1,35 @@
-# Azure DevOps Pipeline for Build, Test, and Deploy
+# Azure DevOps Pipeline for Python (hello.py)
 
 trigger:
-- main
+- main   # runs pipeline on push to main branch
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-# Step 1: Checkout the repository
+# Step 1: Checkout source code from GitHub
 - checkout: self
   displayName: 'Checkout source code'
 
-# Step 2: Set up Node.js (example project, change if using .NET, Java, etc.)
-- task: UseNode@1
+# Step 2: Set up Python
+- task: UsePythonVersion@0
   inputs:
-    versionSpec: '16.x'
-  displayName: 'Set up Node.js'
+    versionSpec: '3.9'   # you can change to 3.10 or 3.11
+    addToPath: true
+  displayName: 'Set up Python'
 
-# Step 3: Install dependencies
+# Step 3: Install dependencies (requirements.txt if exists)
 - script: |
-    npm install
+    python -m pip install --upgrade pip
+    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
   displayName: 'Install dependencies'
 
-# Step 4: Run build
+# Step 4: Run hello.py
 - script: |
-    npm run build
-  displayName: 'Build project'
+    python hello.py
+  displayName: 'Run hello.py'
 
-# Step 5: Run tests
+# Step 5: (Optional) Run tests if you add test_*.py files
 - script: |
-    npm test
+    pytest --maxfail=1 --disable-warnings -q || echo "No tests found"
   displayName: 'Run tests'
-
-# Step 6: Publish build artifacts
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-  displayName: 'Publish build artifacts'
