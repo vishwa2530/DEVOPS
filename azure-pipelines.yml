@@ -1,0 +1,41 @@
+# Azure DevOps Pipeline for Build, Test, and Deploy
+
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+# Step 1: Checkout the repository
+- checkout: self
+  displayName: 'Checkout source code'
+
+# Step 2: Set up Node.js (example project, change if using .NET, Java, etc.)
+- task: UseNode@1
+  inputs:
+    versionSpec: '16.x'
+  displayName: 'Set up Node.js'
+
+# Step 3: Install dependencies
+- script: |
+    npm install
+  displayName: 'Install dependencies'
+
+# Step 4: Run build
+- script: |
+    npm run build
+  displayName: 'Build project'
+
+# Step 5: Run tests
+- script: |
+    npm test
+  displayName: 'Run tests'
+
+# Step 6: Publish build artifacts
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish build artifacts'
